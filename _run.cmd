@@ -17,14 +17,29 @@ echo + Working Internet connection (to reach Microsoft Windows Update)
 echo + PSWindowsUpdate in sub-directory of same name relative to this script
 echo   Download: https://gallery.technet.microsoft.com/scriptcenter/2d191bcd-3308-4edd-9de2-88dff796b0bc
 echo.
-at > nul
+"%systemroot%\system32\reg.exe" query "HKU\S-1-5-19" 1>nul 2>nul
 if not %ERRORLEVEL% EQU 0 (
-      echo Error: Need administrative privileges, aborting.
-      goto :eof
+      echo.
+      echo ERROR: Need administrative privileges, aborting.
+      echo Press any key to exit.
+      pause >nul
+      exit /b 1
 )
 echo Press Ctrl-C to cancel, Enter to continue
 pause >nul
-cd /d %~dp0
+cd /d %~dp0 
+if not %ERRORLEVEL% EQU 0 (
+      echo.
+      echo ERROR: Cannot change dir to script. Running from fileshare? Some functions may not work. 
+      echo Press any key to continue or Ctrl-C to cancel
+      pause >nul
+)
+if not exist "%~dp0PSWindowsUpdate" (
+      echo.
+      echo ERROR: Cannot locate PSWindowsUpdate folder. Automatic hide of this junk updates will not work.
+      echo Press any key to continue or Ctrl-C to cancel
+      pause >nul
+)
 echo.
 echo * Killing GWX.exe
 taskkill /f /im GWX.exe /T
@@ -48,39 +63,39 @@ wusa /uninstall /kb:2976978 /quiet /norestart
 echo.
 echo KB3021917 (Windows 7 only - Update to Windows 7 SP1 for performance improvements)
 wusa /uninstall /kb:3021917 /quiet /norestart
-
 echo.
 echo KB3022345 (Windows 7 only - Update to Windows 7 SP1 for performance improvements)
 wusa /uninstall /kb:3022345 /quiet /norestart
-
 echo.
 echo KB3068708 (Windows 7 only - Update to Windows 7 SP1 for performance improvements)
 wusa /uninstall /kb:3068708 /quiet /norestart
-
 echo.
 echo KB3075249 (Windows 7/8/8.1 - Update that adds telemetry points to consent.exe in Windows 8.1 and Windows 7)
 wusa /uninstall /kb:3075249 /quiet /norestart
-
 echo.
 echo KB3080149 (Windows 7/8/8.1 - Update for customer experience and diagnostic telemetry)
 wusa /uninstall /kb:3080149 /quiet /norestart
 echo.
-echo * Hiding crapware hotfix KBs in Windows Update, this will take a moment
-echo   NOTE: Confirm with Y or A when asked
-echo.
-powershell -ExecutionPolicy RemoteSigned -NoLogo ^
-      -Command "Import-Module %~dp0\PSWindowsUpdate ; Hide-WUUpdate -KBArticleID KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149"
-echo NOTE: The "H"-status stands for "hidden".
-echo.
+if exist "%~dp0PSWindowsUpdate" (
+       echo * Hiding crapware hotfix KBs in Windows Update, this will take a moment
+       echo   NOTE: Confirm with Y or A when asked
+       echo.
 
-echo Disabling tasks...
+       powershell -ExecutionPolicy RemoteSigned -NoLogo ^
+          -Command "Import-Module '%~dp0PSWindowsUpdate' ; Hide-WUUpdate -KBArticleID KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149"
+
+       echo NOTE: The "H"-status stands for "hidden".
+       echo.
+)
+
+echo Disabling tasks
 schtasks /Change /TN "\Microsoft\Windows\Application Experience\AitAgent" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Autochk\Proxy" /DISABLE
-schtasks /Change /TN "Microsoft\Windows\Customer Experience Improvement Program\Consolidator" /DISABLE
-schtasks /Change /TN "Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask" /DISABLE
-schtasks /Change /TN "Microsoft\Windows\Customer Experience Improvement Program\UsbCeip" /DISABLE
+schtasks /Change /TN "\Microsoft\Windows\Customer Experience Improvement Program\Consolidator" /DISABLE
+schtasks /Change /TN "\Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask" /DISABLE
+schtasks /Change /TN "\Microsoft\Windows\Customer Experience Improvement Program\UsbCeip" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Maintenance\WinSAT" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Media Center\ActivateWindowsSearch" /DISABLE
@@ -102,7 +117,12 @@ schtasks /Change /TN "\Microsoft\Windows\Media Center\RegisterSearch" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Media Center\ReindexSearchRoot" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Media Center\SqlLiteRecoveryTask" /DISABLE
 schtasks /Change /TN "\Microsoft\Windows\Media Center\UpdateRecordPath" /DISABLE
-
-echo All done, hit Enter to reboot. Thanks for nothing, Microsoft.
+echo.
+echo Disabling DigiTrack Service
+sc stop Diagtrack
+sc delete Diagtrack
+echo.
+echo All done, hit Enter to reboot now or Crtl+C to exit.
+echo Thanks for nothing, Microsoft.
 pause >nul
-shutdown /r /f /t 120
+shutdown /r /f /t 60
