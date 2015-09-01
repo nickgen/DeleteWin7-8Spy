@@ -82,7 +82,7 @@ if exist "%~dp0PSWindowsUpdate" (
        echo.
 
        powershell -ExecutionPolicy RemoteSigned -NoLogo ^
-          -Command "Import-Module '%~dp0PSWindowsUpdate' ; Hide-WUUpdate -KBArticleID KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149"
+          -Command "Import-Module '%~dp0PSWindowsUpdate' ; Hide-WUUpdate -confirm:$false -KBArticleID KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149"
 
        echo NOTE: The "H"-status stands for "hidden".
        echo.
