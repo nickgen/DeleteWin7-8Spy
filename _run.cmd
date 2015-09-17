@@ -42,6 +42,9 @@ if not exist "%~dp0PSWindowsUpdate" (
 )
 echo.
 echo * Killing GWX.exe
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DisableOSUpgrade /t REG_DWORD /d "1" /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v ReservationsAllowed /t REG_DWORD /d "0" /f
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v DisableGwx /t REG_DWORD /d "1" /f
 taskkill /f /im GWX.exe /T
 echo.
 echo * Listing any installed crapware hotfix KBs
