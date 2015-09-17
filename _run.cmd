@@ -48,7 +48,7 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Gwx" /v DisableGwx /t REG_
 taskkill /f /im GWX.exe /T
 echo.
 echo * Listing any installed crapware hotfix KBs
-powershell get-hotfix -ErrorAction SilentlyContinue -id KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149
+powershell get-hotfix -ErrorAction SilentlyContinue -id KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149,KB3072318
 echo * Uninstalling Microsoft crapware, hang tight
 echo.
 echo KB3035583 (Windows 7/8/8.1 - Update installs Get Windows 10 app in Windows 8.1 and Windows 7 SP1)
@@ -78,6 +78,8 @@ wusa /uninstall /kb:3075249 /quiet /norestart
 echo.
 echo KB3080149 (Windows 7/8/8.1 - Update for customer experience and diagnostic telemetry)
 wusa /uninstall /kb:3080149 /quiet /norestart
+echo KB3072318 (Windows 8.1 - Update for Windows 8.1 OOBE to upgrade to Windows 10)
+wusa /uninstall /kb:3072318 /quiet /norestart
 echo.
 if exist "%~dp0PSWindowsUpdate" (
        echo * Hiding crapware hotfix KBs in Windows Update, this will take a moment
@@ -85,7 +87,7 @@ if exist "%~dp0PSWindowsUpdate" (
        echo.
 
        powershell -ExecutionPolicy RemoteSigned -NoLogo ^
-          -Command "Import-Module '%~dp0PSWindowsUpdate' ; Hide-WUUpdate -confirm:$false -KBArticleID KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149"
+          -Command "Import-Module '%~dp0PSWindowsUpdate' ; Hide-WUUpdate -confirm:$false -KBArticleID KB3035583,KB2952664,KB2976978,KB3021917,KB3022345,KB3068708,KB3075249,KB3080149,KB3072318"
 
        echo NOTE: The "H"-status stands for "hidden".
        echo.
